@@ -7,23 +7,22 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT;
 
-const bodyParser= require('body-parser');
-const cors= require('cors');
+const bodyParser = require("body-parser");
+const cors = require("cors");
 app.use(cors());
 app.use(bodyParser.json());
 
-app.use('/user',userRoutes);
+app.use("/user", userRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server");
 });
 
-
 // Array para almacenar los posts (simulación de una base de datos)
 const posts: Post[] = [];
 
 // Nuevo endpoint para crear un nuevo post
-app.post('/users/:userId/posts', (req: Request, res: Response) => {
+app.post("/users/:userId/posts", (req: Request, res: Response) => {
   const { userId } = req.params;
   const { title, content } = req.body as Post;
 
@@ -42,14 +41,30 @@ app.post('/users/:userId/posts', (req: Request, res: Response) => {
   } else {
     // Si el usuario no está autenticado, devuelve el error 401
     res.status(401).json({
-      errorCode: 'unauthenticated',
-      errorMessage: 'Usuario no autenticado'
+      errorCode: "unauthenticated",
+      errorMessage: "Usuario no autenticado",
     });
   }
 });
 
+// Endpoint para eliminar un post existente
+app.delete("/users/:userId/posts/:postId", (req: Request, res: Response) => {
+  const { userId, postId } = req.params;
 
-
+  // Busca el post por su ID
+  const postID = posts.findIndex((post) => post.postId === postId);
+  if (postID !== -1) {
+    // Si se encuentra el post, elimínalo del array de posts
+    posts.splice(postID, 1);
+    res.status(200).send("Post has been deleted successfully");
+  } else {
+    // Si el post no existe, devuelve el error 404
+    res.status(404).json({
+      errorCode: "post_not_found",
+      errorMessage: "El post no existe",
+    });
+  }
+});
 
 /*
   app.post('/register',(req,res)=>{
@@ -61,8 +76,6 @@ app.post('/users/:userId/posts', (req: Request, res: Response) => {
  
  */
 
-
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
 });
-
