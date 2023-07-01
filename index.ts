@@ -68,6 +68,35 @@ app.delete('/users/:username/posts/:postId', (req: Request, res: Response) => {
   }
 });
 
+// Endpoint para modificar un post existente
+app.put('/users/:username/posts/:postId', (req: Request, res: Response) => {
+  const { username, postId } = req.params;
+  const { title, content } = req.body as Post;
+
+  // Busca el post por su ID y usuario asociado
+  const index = posts.findIndex(post => post.postId === postId && post.username === username);
+  if (index !== -1) {
+    // Si se encuentra el post, modifica sus propiedades
+    posts[index].title = title;
+    posts[index].content = content;
+
+    const modifiedPost = posts[index];
+    res.status(200).json({
+      postId: modifiedPost.postId,
+      title: modifiedPost.title,
+      content: modifiedPost.content,
+      userId: modifiedPost.username
+    });
+  } else {
+    // Si el post no existe, devuelve el error 404
+    res.status(404).json({
+      errorCode: 'post_not_found',
+      errorMessage: 'El post no existe'
+    });
+  }
+});
+
+
 
 /*
   app.post('/register',(req,res)=>{
