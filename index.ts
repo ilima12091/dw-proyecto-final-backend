@@ -23,20 +23,16 @@ app.get("/", (req: Request, res: Response) => {
 const posts: Post[] = [];
 
 // Nuevo endpoint para crear un nuevo post
-app.post('/users/:userId/posts', (req: Request, res: Response) => {
-  const { userId } = req.params;
+app.post('/users/:username/posts', (req: Request, res: Response) => {
+  const { username } = req.params;
   const { title, content } = req.body as Post;
 
-  //
-  //
-  // la lógica para crear un nuevo post
-  //
-  //
+  // lógica para crear un nuevo post
 
-  if (userId) {
+  if (username) {
     // Si el usuario está autenticado, crea el nuevo post
     const postId = String(posts.length + 1); // ID del nuevo post creado
-    const post: Post = { postId, title, content };
+    const post: Post = { postId, title, content, username };
     posts.push(post);
     res.status(200).json(post);
   } else {
