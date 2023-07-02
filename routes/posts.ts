@@ -6,22 +6,36 @@ const router = Router();
 
 const posts: PostCard[] = [];
 
-// Endpoint para obtener las tarjetas de un usuario
-router.get("/:username/posts", (req, res) => {
-  const { username } = req.params;
-
-  // Filtra las tarjetas por el nombre de usuario
-  const userPosts = posts.filter((post) => post.userName === username);
-
-  if (userPosts.length > 0) {
-    res.status(200).json(userPosts);
-  } else {
-    res.status(404).json({
-      errorCode: "user_posts_not_found",
-      errorMessage: "No se encontraron tarjetas para el usuario",
+router.get("/home", async (req, res) => {
+  try {
+    const backendUrl = "http://localhost:8000";
+    const response = await fetch(`${backendUrl}/home`);
+    const postCards = await response.json() as PostCard[];
+    res.status(200).json(postCards);
+  } catch (error) {
+    res.status(500).json({
+      errorCode: "internal_server_error",
+      errorMessage: "Ocurrió un error interno en el servidor",
     });
   }
 });
+
+router.get("/home/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const backendUrl = "http://localhost:8000"; 
+    const response = await fetch(`${backendUrl}/home/${id}`);
+    const postCard = await response.json() as PostCard;
+    res.status(200).json(postCard);
+  } catch (error) {
+    res.status(500).json({
+      errorCode: "internal_server_error",
+      errorMessage: "Ocurrió un error interno en el servidor",
+    });
+  }
+});
+
+
 
 // Nuevo endpoint para crear un nuevo post
 router.post("/:username/posts", (req, res) => {
