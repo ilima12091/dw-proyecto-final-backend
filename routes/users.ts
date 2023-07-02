@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { User } from "../interface/user";
+import executeSqlQuery from "../services/db-client";
 
 const router = Router();
 
@@ -43,6 +44,23 @@ router.put("/:username", (req, res) => {
       errorMessage: "Usuario no existe",
     });
   }
+});
+
+router.get("/search", async (req, res) => {
+  const { username } = req.query;
+
+  const usersQuery = `SELECT * FROM users WHERE username LIKE '%${username}%'`;
+
+  const usersResult = await executeSqlQuery(usersQuery);
+
+  const responseData = usersResult.recordset.map(
+    ({ user_id, username, profile_picture }) => ({
+      user_id,
+      username,
+      profile_picture: profile_picture,
+    })
+  );
+  res.json(responseData);
 });
 
 export default router;
