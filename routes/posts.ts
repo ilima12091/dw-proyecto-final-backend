@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { User } from "./user";
 import { Timestamp } from "./timestamp";
 import { PostCard } from "../interface/post-card";
 
@@ -35,8 +34,8 @@ router.post("/:username/posts", (req, res) => {
     // Si el usuario está autenticado, crea el nuevo post
     const postId = posts.length + 1; // ID del nuevo post creado
     const post: PostCard = {
-      PostId: postId,
-      UserId: 0, // Provide the appropriate User ID
+      postId: postId,
+      userId: 0, // Provide the appropriate User ID
       userName,
       content,
       timeStamp,
@@ -59,7 +58,7 @@ router.delete("/:username/posts/:postId", (req, res) => {
 
   // Busca el post por su ID y usuario asociado
   const index = posts.findIndex(
-    (post) => post.PostId === Number(postId) && post.userName === username
+    (post) => post.postId === Number(postId) && post.userName === username
   );
   if (index !== -1) {
     // Si se encuentra el post, elimínalo del array de posts
@@ -77,11 +76,11 @@ router.delete("/:username/posts/:postId", (req, res) => {
 // Endpoint para modificar un post existente
 router.put("/:username/posts/:postId", (req, res) => {
   const { username, postId } = req.params;
-  const { content, UserId } = req.body as PostCard;
+  const { content, userId } = req.body as PostCard;
 
   // Busca el post por su ID y usuario asociado
   const index = posts.findIndex(
-    (post) => post.PostId === Number(postId) && post.userName === username
+    (post) => post.postId === Number(postId) && post.userName === username
   );
   if (index !== -1) {
     // Si se encuentra el post, modifica su contenido
