@@ -2,6 +2,8 @@ import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import userRoutes from "./routes/user";
 import postRoutes from "./routes/post";
+import { User } from "./interface/user";
+import { Post } from "./interface/post";
 
 dotenv.config();
 
