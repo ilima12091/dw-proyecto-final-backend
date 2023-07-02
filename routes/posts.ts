@@ -1,21 +1,60 @@
 import { Router } from "express";
-import { Post } from "../interface/post";
+import { Timestamp } from "./timestamp";
+import { PostCard } from "../interface/post-card";
 
 const router = Router();
 
-const posts: Post[] = [];
+const posts: PostCard[] = [];
+
+router.get("/home", async (req, res) => {
+  try {
+    const backendUrl = "http://localhost:8000";
+    const response = await fetch(`${backendUrl}/home`);
+    const postCards = await response.json() as PostCard[];
+    res.status(200).json(postCards);
+  } catch (error) {
+    res.status(500).json({
+      errorCode: "internal_server_error",
+      errorMessage: "Ocurrió un error interno en el servidor",
+    });
+  }
+});
+
+router.get("/home/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const backendUrl = "http://localhost:8000"; 
+    const response = await fetch(`${backendUrl}/home/${id}`);
+    const postCard = await response.json() as PostCard;
+    res.status(200).json(postCard);
+  } catch (error) {
+    res.status(500).json({
+      errorCode: "internal_server_error",
+      errorMessage: "Ocurrió un error interno en el servidor",
+    });
+  }
+});
+
+
 
 // Nuevo endpoint para crear un nuevo post
 router.post("/:username/posts", (req, res) => {
   const { username } = req.params;
-  const { title, content } = req.body as Post;
+  const { userImage, userName, content, timeStamp } = req.body;
 
   // lógica para crear un nuevo post
 
   if (username) {
     // Si el usuario está autenticado, crea el nuevo post
-    const postId = String(posts.length + 1); // ID del nuevo post creado
-    const post: Post = { postId, title, content, username };
+    const postId = posts.length + 1; // ID del nuevo post creado
+    const post: PostCard = {
+      postId: postId,
+      userId: 0, // Provide the appropriate User ID
+      username,
+      content,
+      timeStamp,
+      userImage,
+    };
     posts.push(post);
     res.status(200).json(post);
   } else {
@@ -33,7 +72,7 @@ router.delete("/:username/posts/:postId", (req, res) => {
 
   // Busca el post por su ID y usuario asociado
   const index = posts.findIndex(
-    (post) => post.postId === postId && post.username === username
+    (post) => post.postId === Number(postId) && post.username === username
   );
   if (index !== -1) {
     // Si se encuentra el post, elimínalo del array de posts
@@ -51,24 +90,18 @@ router.delete("/:username/posts/:postId", (req, res) => {
 // Endpoint para modificar un post existente
 router.put("/:username/posts/:postId", (req, res) => {
   const { username, postId } = req.params;
-  const { title, content } = req.body as Post;
+  const { content, userId } = req.body as PostCard;
 
   // Busca el post por su ID y usuario asociado
   const index = posts.findIndex(
-    (post) => post.postId === postId && post.username === username
+    (post) => post.postId === Number(postId) && post.username === username
   );
   if (index !== -1) {
-    // Si se encuentra el post, modifica sus propiedades
-    posts[index].title = title;
+    // Si se encuentra el post, modifica su contenido
     posts[index].content = content;
 
     const modifiedPost = posts[index];
-    res.status(200).json({
-      postId: modifiedPost.postId,
-      title: modifiedPost.title,
-      content: modifiedPost.content,
-      userId: modifiedPost.username,
-    });
+    res.status(200).json(modifiedPost);
   } else {
     // Si el post no existe, devuelve el error 404
     res.status(404).json({

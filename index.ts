@@ -6,7 +6,7 @@ import cookieParser from "cookie-parser";
 
 import session from "./routes/session";
 import users from "./routes/users";
-import posts from "./routes/posts";
+import postCards from "./routes/posts";
 import validateSession from "./middlewares/session";
 
 dotenv.config();
@@ -32,7 +32,7 @@ app.use(validateSession);
 
 // Routes with token validation
 app.use("/users", users);
-app.use("/users", posts);
+app.use("/posts", postCards);
 
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
