@@ -40,7 +40,7 @@ router.get("/home/:id", async (req, res) => {
 // Nuevo endpoint para crear un nuevo post
 router.post("/:username/posts", (req, res) => {
   const { username } = req.params;
-  const { userImage, userName, content, timeStamp } = req.body as PostCard;
+  const { userImage, userName, content, timeStamp } = req.body;
 
   // lógica para crear un nuevo post
 
@@ -50,7 +50,7 @@ router.post("/:username/posts", (req, res) => {
     const post: PostCard = {
       postId: postId,
       userId: 0, // Provide the appropriate User ID
-      userName,
+      username,
       content,
       timeStamp,
       userImage,
@@ -72,7 +72,7 @@ router.delete("/:username/posts/:postId", (req, res) => {
 
   // Busca el post por su ID y usuario asociado
   const index = posts.findIndex(
-    (post) => post.postId === Number(postId) && post.userName === username
+    (post) => post.postId === Number(postId) && post.username === username
   );
   if (index !== -1) {
     // Si se encuentra el post, elimínalo del array de posts
@@ -94,7 +94,7 @@ router.put("/:username/posts/:postId", (req, res) => {
 
   // Busca el post por su ID y usuario asociado
   const index = posts.findIndex(
-    (post) => post.postId === Number(postId) && post.userName === username
+    (post) => post.postId === Number(postId) && post.username === username
   );
   if (index !== -1) {
     // Si se encuentra el post, modifica su contenido
