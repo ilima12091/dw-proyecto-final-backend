@@ -4,9 +4,10 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 
-import userRoutes from "./routes/user";
-import postRoutes from "./routes/post";
-import login from "./routes/login";
+import session from "./routes/session";
+import users from "./routes/users";
+import posts from "./routes/posts";
+import validateSession from "./middlewares/session";
 
 dotenv.config();
 
@@ -23,9 +24,15 @@ app.use(
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.use("/login", login);
-app.use("/user", userRoutes);
-app.use("/post", postRoutes);
+// Routes without token validation
+app.use("/session", session);
+
+// Token validation middleware
+app.use(validateSession);
+
+// Routes with token validation
+app.use("/users", users);
+app.use("/users", posts);
 
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
