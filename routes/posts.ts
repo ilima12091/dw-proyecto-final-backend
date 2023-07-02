@@ -1,21 +1,47 @@
 import { Router } from "express";
+import { User } from "./user";
+import { Timestamp } from "./timestamp";
 import { PostCard } from "../interface/post-card";
 
 const router = Router();
 
 const posts: PostCard[] = [];
 
+// Endpoint para obtener las tarjetas de un usuario
+router.get("/:username/posts", (req, res) => {
+  const { username } = req.params;
+
+  // Filtra las tarjetas por el nombre de usuario
+  const userPosts = posts.filter((post) => post.userName === username);
+
+  if (userPosts.length > 0) {
+    res.status(200).json(userPosts);
+  } else {
+    res.status(404).json({
+      errorCode: "user_posts_not_found",
+      errorMessage: "No se encontraron tarjetas para el usuario",
+    });
+  }
+});
+
 // Nuevo endpoint para crear un nuevo post
 router.post("/:username/posts", (req, res) => {
   const { username } = req.params;
-  const { userImage, userName, postText, time } = req.body as PostCard;
+  const { userImage, userName, content, timeStamp } = req.body as PostCard;
 
   // lógica para crear un nuevo post
 
   if (username) {
     // Si el usuario está autenticado, crea el nuevo post
     const postId = posts.length + 1; // ID del nuevo post creado
-    const post: PostCard = { id: postId, userImage, userName, postText, time };
+    const post: PostCard = {
+      PostId: postId,
+      UserId: 0, // Provide the appropriate User ID
+      userName,
+      content,
+      timeStamp,
+      userImage,
+    };
     posts.push(post);
     res.status(200).json(post);
   } else {
@@ -33,7 +59,7 @@ router.delete("/:username/posts/:postId", (req, res) => {
 
   // Busca el post por su ID y usuario asociado
   const index = posts.findIndex(
-    (post) => post.id === Number(postId) && post.userName === username
+    (post) => post.PostId === Number(postId) && post.userName === username
   );
   if (index !== -1) {
     // Si se encuentra el post, elimínalo del array de posts
@@ -51,15 +77,15 @@ router.delete("/:username/posts/:postId", (req, res) => {
 // Endpoint para modificar un post existente
 router.put("/:username/posts/:postId", (req, res) => {
   const { username, postId } = req.params;
-  const {postText} = req.body as PostCard;
+  const { content, UserId } = req.body as PostCard;
 
   // Busca el post por su ID y usuario asociado
   const index = posts.findIndex(
-    (post) => post.id === Number(postId) && post.userName === username
+    (post) => post.PostId === Number(postId) && post.userName === username
   );
   if (index !== -1) {
     // Si se encuentra el post, modifica su contenido
-    posts[index].postText = postText;
+    posts[index].content = content;
 
     const modifiedPost = posts[index];
     res.status(200).json(modifiedPost);
