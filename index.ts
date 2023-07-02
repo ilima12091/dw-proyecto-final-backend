@@ -1,7 +1,10 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import userRoutes from "./routes/user";
+import postRoutes from "./routes/post";
 import { User } from "./interface/user";
+import { Post } from "./interface/post";
+
 dotenv.config();
 
 const app: Express = express();
@@ -13,6 +16,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.use('/user',userRoutes);
+app.use('/post',postRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server");
