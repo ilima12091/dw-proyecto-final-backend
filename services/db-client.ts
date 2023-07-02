@@ -19,9 +19,8 @@ const executeSqlQuery = async (query: string) => {
   try {
     await sql.connect(dbConfig);
     const result = await sql.query(query);
-    return result.recordset;
+    return result;
   } catch (error) {
-    console.error("Error excecuting query: ", error);
     throw error;
   }
 };
