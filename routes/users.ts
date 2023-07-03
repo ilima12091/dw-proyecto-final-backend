@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { User } from "../interface/user";
 import executeSqlQuery from "../services/db-client";
+import { userData } from "../controllers/user.controllers";
 
 const router = Router();
 
@@ -63,4 +64,42 @@ router.get("/search", async (req, res) => {
   res.json(responseData);
 });
 
+router.get("/user/:user_id", async (req, res) => {
+    
+    
+  const user_id = Number(req.params.user_id);
+
+  try {
+    const user = await userData.getUserById(user_id);
+    console.log('Retrieved user:', user);
+  
+    if (user) {
+      res.status(200).json(user);
+    } else {
+      res.status(404).json({ error: "User not found" });
+    }
+  } catch (error) {
+    console.error("Error retrieving user:", error);
+    res.status(500).json({ error: "Failed to retrieve user" });
+  }
+});  
+
+router.get("/:username", async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const user = await userData.getUserByUsername(username);
+
+    if (user) {
+      res.status(200).json(user);
+    } else {
+      res.status(404).json({ error: "User not found" });
+    }
+  } catch (error) {
+    console.error("Error retrieving user:", error);
+    res.status(500).json({ error: "Failed to retrieve user" });
+  }
+});
+
 export default router;
+
