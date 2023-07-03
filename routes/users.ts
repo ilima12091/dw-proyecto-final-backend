@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { User } from "../interface/user";
 import executeSqlQuery from "../services/db-client";
+import jwt from "jsonwebtoken";
 
 const router = Router();
 
@@ -26,15 +26,24 @@ router.put("/:id", async (req, res) => {
 router.get("/search", async (req, res) => {
   const { username } = req.query;
 
-  const usersQuery = `SELECT * FROM users WHERE username LIKE '%${username}%'`;
+  const sessionCookie = req.cookies.SESSION;
+
+  const decodedToken: any = jwt.verify(sessionCookie, process.env.JWT_SECRET as string);
+
+  const usersQuery = `SELECT u.*, 
+    CASE WHEN f.follower_id IS NOT NULL THEN 1 ELSE 0 END AS following
+    FROM users u
+    LEFT JOIN Follows f ON f.followed_id = u.user_id AND f.follower_id = ${decodedToken.user_id}
+    WHERE u.username LIKE '%${username}%' AND u.user_id != ${decodedToken.user_id};`;
 
   const usersResult = await executeSqlQuery(usersQuery);
 
   const responseData = usersResult.recordset.map(
-    ({ user_id, username, profile_picture }) => ({
+    ({ user_id, username, profile_picture, following }) => ({
       user_id,
       username,
-      profile_picture: profile_picture,
+      profile_picture,
+      following,
     })
   );
   res.json(responseData);
@@ -65,6 +74,34 @@ router.get("/:id", async (req, res) => {
   };
 
   res.json(responseData);
+});
+
+router.post("/follow", async (req, res) => {
+  const { followedId } = req.body;
+
+  const sessionCookie = req.cookies.SESSION;
+
+  const decodedToken: any = jwt.verify(sessionCookie, process.env.JWT_SECRET as string);
+
+  const insertFollowQuery = `INSERT INTO Follows (follower_id, followed_id) VALUES (${decodedToken.user_id}, ${followedId})`;
+
+  await executeSqlQuery(insertFollowQuery);
+
+  res.json({ message: "Followed successfully" });
+});
+
+router.post("/unfollow", async (req, res) => {
+  const { followedId } = req.body;
+
+  const sessionCookie = req.cookies.SESSION;
+
+  const decodedToken: any = jwt.verify(sessionCookie, process.env.JWT_SECRET as string);
+
+  const deleteFollowQuery = `DELETE FROM Follows WHERE follower_id = ${decodedToken.user_id} AND followed_id = ${followedId}`;
+
+  await executeSqlQuery(deleteFollowQuery);
+
+  res.json({ message: "Unfollowed successfully" });
 });
 
 export default router;
