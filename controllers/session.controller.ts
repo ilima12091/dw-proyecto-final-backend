@@ -53,6 +53,7 @@ export const login: RequestHandler = async (req, res) => {
 
   res.status(200).send({
     sessionExpiration: Date.now() + ((process.env.TOKEN_EXPIRATION ?? 3600000) as number),
+    userId: userData.user_id,
   });
 };
 
