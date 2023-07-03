@@ -25,4 +25,19 @@ router.get("/posts/feed", async (req, res) => {
   res.json(postsResult.recordset);
 });
 
+router.post("/posts", async (req, res) => {
+  const { content } = req.body;
+
+  const sessionCookie = req.cookies.SESSION;
+
+  const decodedToken: any = jwt.verify(sessionCookie, process.env.JWT_SECRET as string);
+
+  const insertPostQuery = `INSERT INTO Posts (user_id, content, timestamp)
+    VALUES (${decodedToken.user_id}, '${content}', GETDATE())`;
+
+  await executeSqlQuery(insertPostQuery);
+
+  res.json({ message: "Post created successfully" });
+});
+
 export default router;
