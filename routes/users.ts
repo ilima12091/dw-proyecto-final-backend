@@ -7,7 +7,7 @@ const router = Router();
 
 const users: User[] = [];
 
-// Endpoint para actualizar los datos de perfil de un usuario
+// Endpoint para actualizar los datos de perfil de un usuario por username
 router.put("/:username", (req, res) => {
   const { username, name, surname, email, password } = req.body;
 
@@ -64,7 +64,7 @@ router.get("/search", async (req, res) => {
   res.json(responseData);
 });
 
-router.get("/user/:user_id", async (req, res) => {
+router.get("/:user_id", async (req, res) => {
     
     
   const user_id = Number(req.params.user_id);
@@ -100,6 +100,34 @@ router.get("/:username", async (req, res) => {
     res.status(500).json({ error: "Failed to retrieve user" });
   }
 });
+
+// Endpoint para actualizar los datos de perfil de un usuario por username
+router.put("update/:user_id", async (req, res) => {
+  const { username, name, surname, password } = req.body;
+  const user_id = Number(req.params.user_id);
+
+  try {
+    const user = await userData.getUserById(user_id);
+    console.log('Retrieved user:', user);
+
+    if (user) {
+      user.username = username;
+      user.name = name;
+      user.surname = surname;
+      user.password = password;
+
+      // Save the updated user
+      const updatedUser = await userData.updateUserById(user_id, user);
+      res.status(200).json(updatedUser);
+    } else {
+      res.status(404).json({ error: "User not found" });
+    }
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ error: "Failed to update user" });
+  }
+});
+
 
 export default router;
 

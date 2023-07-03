@@ -58,7 +58,7 @@ export const userData = {
 
   
   async updateUserById(
-    user_id: string,
+    user_id: number,
     updatedUser: User
   ): Promise<any> {
     const query = `
@@ -66,7 +66,7 @@ export const userData = {
           SET
             name = '${updatedUser.name}',
             surname = '${updatedUser.surname}',
-            email = '${updatedUser.email}',
+            username = '${updatedUser.username}',
             password = '${updatedUser.password}'
           WHERE
             user_id = '${user_id}'
