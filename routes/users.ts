@@ -4,44 +4,21 @@ import executeSqlQuery from "../services/db-client";
 
 const router = Router();
 
-const users: User[] = [];
+router.put("/:id", async (req, res) => {
+  const { id } = req.params;
+  const { name, surname, username } = req.body;
 
-// Endpoint para actualizar los datos de perfil de un usuario
-router.put("/:username", (req, res) => {
-  const { username, name, surname, email, password } = req.body;
+  const userUpdateQuery = `UPDATE Users SET ${name && `name = '${name}',`} ${
+    surname && `surname = '${surname}',`
+  } ${username && `username = '${username}'`} WHERE user_id = ${id};`;
 
-  // Busca el usuario por su nombre de usuario
-  const user = users.find((user) => user.username === username);
-
-  // Si el usuario existe, actualiza sus propiedades
-  if (user) {
-    if (name) {
-      user.name = name;
-    }
-    if (surname) {
-      user.surname = surname;
-    }
-    if (email) {
-      user.email = email;
-    }
-    if (password) {
-      user.password = password;
-    }
-    if (username) {
-      user.username = username;
-    }
-
-    res.status(200).json({
-      name: user.name,
-      surname: user.surname,
-      email: user.email,
-      userName: user.username,
-    });
-  } else {
-    // Si el usuario no existe, devuelve el error 404
-    res.status(404).json({
-      errorCode: "user_not_found",
-      errorMessage: "Usuario no existe",
+  try {
+    await executeSqlQuery(userUpdateQuery);
+    res.json({ message: "User updated successfully" });
+  } catch (error) {
+    res.status(500).json({
+      errorCode: "internal_server_error",
+      errorMessage: "Internal error",
     });
   }
 });
@@ -60,6 +37,33 @@ router.get("/search", async (req, res) => {
       profile_picture: profile_picture,
     })
   );
+  res.json(responseData);
+});
+
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+
+  const userQuery = `SELECT * FROM users WHERE user_id = ${id}`;
+
+  const userResult = await executeSqlQuery(userQuery);
+
+  if (userResult.recordset.length === 0) {
+    res.status(404).json({
+      errorCode: "user_not_found",
+      errorMessage: "Usuario no existe",
+    });
+  }
+
+  const { name, surname, email, username, profile_picture } = userResult.recordset[0];
+
+  const responseData = {
+    name,
+    surname,
+    email,
+    username,
+    profile_picture,
+  };
+
   res.json(responseData);
 });
 
